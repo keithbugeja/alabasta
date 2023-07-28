@@ -2,16 +2,17 @@ use std::rc::Rc;
 
 
 fn main() {
-    let expression = "x y z";
-    // let expression = r"(\f. \x. f (f x)) (\y. y * 2) 3";
+    //let expression = "x y z";
+    let expression = r"(\f. \x. f (f x)) (\y. y * 2) 3";
     //let expression = r"(\f. x)";
     
     let mut lexer = Lexer::new(expression.to_string());
     let token_list = lexer.scan().unwrap();
     //println!("{:?}", token_list);
+
     let ast = Parser::new(token_list).parse().unwrap();
 
-    println!("{:?}", ast);
+    println!("\n{:?}", ast);
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -84,8 +85,6 @@ impl Parser {
         }
 
         if let Some(token) = self.token_list.get(self.position) {
-            // println!("Peek: {:?}", token);
-        
             return Some(token.clone());
         }
 
@@ -93,8 +92,6 @@ impl Parser {
     }
 
     fn expect(&mut self, token_kind: Lexeme) -> Option<Token> {
-        println!("Expect: {:?}", token_kind);
-        
         let token = self.peek()?.token_type.clone();
 
         match (token, token_kind) {
@@ -119,11 +116,13 @@ impl Parser {
     }
 
     fn parse_expression(&mut self) -> Option<ExpressionNode> {
-        println!("==> Parse Expression");
-        
+        // --------------------
+        // EBNF
+        // --------------------
         // E :=
         //      | \I. E
         //      | E E
+        //      | E <op> E
         //      | (E)
         //      | I | C
 
@@ -141,44 +140,43 @@ impl Parser {
         Some(left)
     }
 
-    fn parse_single_expression(&mut self) -> Option<ExpressionNode> {
+    fn parse_single_expression(&mut self) -> Option<ExpressionNode> {        
         let token = self.peek()?;
 
         let expression = match token.token_type {
             Lexeme::Lambda => self.parse_abstraction(),
             Lexeme::LeftParen => self.parse_subexpression(),
-            Lexeme::Identifier(_) => self.parse_variable(),
-            Lexeme::Integer(_) => self.parse_constant(),
-            // Lexeme::Integer(_) => self.parse_arithmetic(),
-            _ => {
-                return None;
-            },
+            Lexeme::Identifier(_) | Lexeme::Integer (_) => self.parse_arithmetic(),
+            _ => { None },
         };
 
         expression
     }
 
     fn parse_subexpression(&mut self) -> Option<ExpressionNode> {
-        println!("==> Parse Sub-expression");
-
+        print!("(");
         let _ = self.expect(Lexeme::LeftParen)?;
         let expression = self.parse_expression()?;
         let _ = self.expect(Lexeme::RightParen)?;
+        print!(")");
 
         Some(expression)
     }
 
-    fn parse_abstraction(&mut self) -> Option<ExpressionNode> {
-        println!("==> Parse Abstraction");
-        
+    fn parse_abstraction(&mut self) -> Option<ExpressionNode> 
+    {
+        print!("λ");
         let _ = self.expect(Lexeme::Lambda)?;
 
         let variable = match self.parse_variable()? {
-            ExpressionNode::Variable(variable) => variable,
+            ExpressionNode::Variable(variable) => { 
+                variable
+            },
             _ => { return None; }
         };
         
         let _ = self.expect(Lexeme::Dot)?;
+        print!(".");
         
         let expression = self.parse_expression()?;
     
@@ -191,31 +189,42 @@ impl Parser {
     }
 
     fn parse_arithmetic(&mut self) -> Option<ExpressionNode> {
-        let left = self.expect(Lexeme::Integer(0))?;
-
-        let operator_type;
+        let left = match self.peek()?.token_type {
+            Lexeme::Identifier(_) => self.parse_variable()?,
+            Lexeme::Integer(_) => self.parse_constant()?,
+            _ => { return None; }
+        };
 
         if let Some(operator) = self.expect(Lexeme::BinaryOperator(String::new())) {
             match operator.token_type {
                 Lexeme::BinaryOperator(value) => {
-                    operator_type = value;
+                    print!(" {} ", value);
+                    
+                    let right = match self.peek()?.token_type {
+                        Lexeme::Identifier(_) => self.parse_variable()?,
+                        Lexeme::Integer(_) => self.parse_constant()?,
+                        _ => { return None }
+                    };
+
+                    return Some(ExpressionNode::Arithmetic(
+                        ArithmeticNode {
+                            operator: value,
+                            left: Rc::new(left),
+                            right: Rc::new(right),
+                        }
+                    ));
                 }
                 _ => { return None; }
             }
+        } 
         
-            let right = self.expect(Lexeme::Integer(0))?;
-        }
-
-        None
+        Some(left)
     }
 
     fn parse_variable(&mut self) -> Option<ExpressionNode> {
-        println!("==> Parse Variable");
-
         if let Some(identifier) = self.expect(Lexeme::Identifier(String::new())) {
-            println!("Identifier: {:?}", identifier);
-            
             if let Lexeme::Identifier(value) = identifier.token_type {
+                print!("{}", value);
                 Some(ExpressionNode::Variable(VariableNode { name: value }))
             } else {
                 None
@@ -226,12 +235,9 @@ impl Parser {
     }
 
     fn parse_constant(&mut self) -> Option<ExpressionNode> {
-        println!("==> Parse Constant");
-
         if let Some(integer) = self.expect(Lexeme::Integer(0)) {
-            println!("Constant: {:?}", integer);
-            
             if let Lexeme::Integer(value) = integer.token_type {
+                print!("{}", value);
                 Some(ExpressionNode::Constant(ConstantNode { value }))
             } else {
                 None
@@ -241,6 +247,12 @@ impl Parser {
         }
     }
 }
+
+///
+/// Lexical analysis (tokenization)
+/// 
+/// The lexer takes a string of characters and converts it into a list of tokens.
+/// 
 
 #[derive(Debug, PartialEq)]
 pub struct Lexer {
@@ -282,7 +294,7 @@ impl Lexer {
 
     pub fn scan(&mut self) -> Result<Vec::<Token>, ()> {
         let mut symbol;
-        let mut symbol_position ;
+        let mut symbol_position;
         let mut token_list = Vec::<Token>::new();
 
         loop {
@@ -298,7 +310,6 @@ impl Lexer {
                 // Identifier
                 'a'..='z' | 'A'..='Z' => {
                     let mut identifier = String::new();
-                    symbol_position = self.position();
 
                     while let Some(chr) = self.peek() {
                         if chr.is_alphanumeric() {
@@ -319,7 +330,6 @@ impl Lexer {
                 // Integer
                 '0'..='9' => {
                     let mut integer = String::new();
-                    symbol_position = self.position();
 
                     while let Some(chr) = self.peek() {
                         if chr.is_numeric() {
@@ -338,9 +348,7 @@ impl Lexer {
                     });
                 },
                 // Binary Operator
-                '+' | '-' | '*' | '/' | '%' => {
-                    symbol_position = self.position;
-                    
+                '+' | '-' | '*' | '/' | '%' => {                    
                     self.next();
 
                     token_list.push(Token {
@@ -352,8 +360,6 @@ impl Lexer {
                 },
                 // Lambda
                 '\\' => {
-                    symbol_position = self.position;
-                    
                     self.next();
 
                     token_list.push(Token {
@@ -365,8 +371,6 @@ impl Lexer {
                 },
                 // Dot
                 '.' => {
-                    symbol_position = self.position;
-                    
                     self.next();
 
                     token_list.push(Token {
@@ -378,8 +382,6 @@ impl Lexer {
                 },
                 // Left Paren
                 '(' => {
-                    symbol_position = self.position;
-                    
                     self.next();
 
                     token_list.push(Token {
@@ -391,8 +393,6 @@ impl Lexer {
                 },
                 // Right Paren
                 ')' => {
-                    symbol_position = self.position;
-                    
                     self.next();
 
                     token_list.push(Token {
@@ -404,8 +404,6 @@ impl Lexer {
                 },
                 // Comma
                 ',' => {
-                    symbol_position = self.position;
-                    
                     self.next();
 
                     token_list.push(Token {
