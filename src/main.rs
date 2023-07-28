@@ -3,7 +3,9 @@ use std::rc::Rc;
 
 fn main() {
     //let expression = "x y z";
-    let expression = r"(\f. \x. f (f x)) (\y. y * 2) 3";
+    // let expression = r"(\f. \x. f (f x)) (\y. y * 2) 3";
+    let expression = r"(\x. x + 3) ((\y. y * 2) 5) + (\z. z / 2) (4 - 1)";
+
     //let expression = r"(\f. x)";
     
     let mut lexer = Lexer::new(expression.to_string());
@@ -107,7 +109,9 @@ impl Parser {
             (one, two) if one == two => {
                 self.next()
             },
-            (_, _) => { None },
+            (_, _) => { 
+                None 
+            },
         }
     }
 
@@ -127,14 +131,20 @@ impl Parser {
         //      | I | C
 
         let mut left = self.parse_single_expression()?;
-    
-        while let Some(right) = self.parse_single_expression() {
-            left = ExpressionNode::Application(
-                ApplicationNode {
-                    function: Rc::new(left),
-                    argument: Rc::new(right),
-                }                
-            );
+
+        loop {
+            if let Some(right) = self.parse_single_expression() {
+                left = ExpressionNode::Application(
+                    ApplicationNode {
+                        function: Rc::new(left),
+                        argument: Rc::new(right),
+                    }                
+                );
+            } else if let Some(arithmetic) = self.parse_binary_operation(left.clone()) {
+                left = arithmetic;
+            } else {
+                break;
+            }
         }
     
         Some(left)
@@ -186,6 +196,24 @@ impl Parser {
                 body: Rc::new(expression),
             }
         ));
+    }
+    
+    fn parse_binary_operation(&mut self, left: ExpressionNode) -> Option<ExpressionNode> {
+        let operator = self.expect(Lexeme::BinaryOperator(String::new()))?;
+
+        if let Lexeme::BinaryOperator(value) = operator.token_type {
+            print!(" {} ", value);
+
+            let right = self.parse_single_expression()?;
+            let expression = ExpressionNode::Arithmetic(ArithmeticNode {
+                operator: value,
+                left: Rc::new(left),
+                right: Rc::new(right),
+            });
+            Some(expression)
+        } else {
+            None
+        }
     }
 
     fn parse_arithmetic(&mut self) -> Option<ExpressionNode> {
