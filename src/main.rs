@@ -56,6 +56,34 @@ pub struct ArithmeticNode {
     right: Rc<ExpressionNode>,
 }
 
+///
+/// Parsing
+/// 
+/// The parser takes a list of tokens and converts them into an abstract syntax tree. Lambda expressions
+/// are left-associative with respect to applications (function calls). This means that the expression
+/// "x y z" is parsed as "(x y) z".
+/// 
+/// The language is described by the following EBNF:
+/// 
+/// Expression  :=  Variable
+///             |   Constant
+///             |   '\' Variable '.' Expression
+///             |   '(' Expression ')'
+///             |   Expression Expression
+///             |   Expression BinaryOperator Expression
+///             |   'let' Variable '=' Expression 'in' Expression
+/// 
+/// Variable    :=  Identifier
+/// 
+/// Constant    :=  Integer
+/// 
+/// BinaryOperator := '+' | '-' | '*' | '/'
+/// 
+/// Identifier  :=  [a-zA-Z]+
+/// 
+/// Integer     :=  [0-9]+
+///  
+
 pub struct Parser {
     token_list: Vec::<Token>,
     position: usize,
@@ -150,12 +178,17 @@ impl Parser {
         Some(left)
     }
 
+    fn parse_let_expression(&mut self) -> Option<ExpressionNode> {
+        None
+    }
+
     fn parse_single_expression(&mut self) -> Option<ExpressionNode> {        
         let token = self.peek()?;
 
         let expression = match token.token_type {
             Lexeme::Lambda => self.parse_abstraction(),
             Lexeme::LeftParen => self.parse_subexpression(),
+            Lexeme::Let => self.parse_let_expression(),
             Lexeme::Identifier(_) | Lexeme::Integer (_) => self.parse_arithmetic(),
             _ => { None },
         };
@@ -173,8 +206,7 @@ impl Parser {
         Some(expression)
     }
 
-    fn parse_abstraction(&mut self) -> Option<ExpressionNode> 
-    {
+    fn parse_abstraction(&mut self) -> Option<ExpressionNode> {
         print!("λ");
         let _ = self.expect(Lexeme::Lambda)?;
 
@@ -349,7 +381,7 @@ impl Lexer {
                     }
 
                     token_list.push(Token {
-                        token_type: Lexeme::Identifier(identifier),
+                        token_type: lexeme_from_string(identifier),
                         line_number: 0,
                         char_start: symbol_position,
                         char_end: self.position(),
@@ -465,6 +497,9 @@ pub enum Lexeme
     Identifier(String),
     Integer(i64),
     BinaryOperator(String),
+    Let,
+    In,
+    Equals,
     Lambda,
     Dot,
     LeftParen,
@@ -480,6 +515,9 @@ pub fn lexeme_from_string(input: String) -> Lexeme {
         "(" => Lexeme::LeftParen,
         ")" => Lexeme::RightParen,
         "," => Lexeme::Comma,
+        "let" => Lexeme::Let,
+        "in" => Lexeme::In,
+        "=" => Lexeme::Equals,
         _ => {
             if input.chars().all(char::is_numeric) {
                 Lexeme::Integer(input.parse::<i64>().unwrap())
