@@ -28,6 +28,7 @@
 use crate::lexer::{Token, Lexeme};
 use crate::ast::{ExpressionNode, VariableNode, ConstantNode, AbstractionNode, ApplicationNode, ArithmeticNode, LetNode};
 
+use std::cell::RefCell;
 use std::rc::Rc;
 
 pub struct Parser {
@@ -260,7 +261,7 @@ impl Parser {
         if let Some(identifier) = self.expect(Lexeme::Identifier(String::new())) {
             if let Lexeme::Identifier(value) = identifier.token_type {
                 print!("{}", value);
-                Some(ExpressionNode::Variable(VariableNode { name: value }))
+                Some(ExpressionNode::Variable(VariableNode { name: Rc::new(RefCell::new(value))}))
             } else {
                 None
             }
