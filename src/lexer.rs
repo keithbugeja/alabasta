@@ -42,7 +42,7 @@ impl Lexer {
         return None;
     }
 
-    pub fn scan(&mut self) -> Result<Vec::<Token>, ()> {
+    pub fn scan(&mut self) -> Result<Vec::<Token>, String> {
         let mut symbol;
         let mut symbol_position;
         let mut token_list = Vec::<Token>::new();
@@ -62,7 +62,7 @@ impl Lexer {
                     let mut identifier = String::new();
 
                     while let Some(chr) = self.peek() {
-                        if chr.is_alphanumeric() {
+                        if chr.is_alphanumeric() || chr == '_' {
                             identifier.push(chr);
                             self.next();
                         } else {
@@ -179,7 +179,7 @@ impl Lexer {
                     return Ok(token_list);
                 },
                 _ => {
-                    return Err(());
+                    return Err("Unexpected symbol encountered!".to_string());
                 }
             }
 
@@ -222,7 +222,7 @@ pub fn lexeme_from_string(input: String) -> Lexeme {
         _ => {
             if input.chars().all(char::is_numeric) {
                 Lexeme::Integer(input.parse::<i64>().unwrap())
-            } else if input.chars().all(char::is_alphabetic) {
+            } else if input.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
                 Lexeme::Identifier(input)
             } else {
                 panic!("Invalid lexeme")

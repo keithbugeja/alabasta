@@ -90,8 +90,8 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Result<ExpressionNode, ()> {
-        self.parse_expression().map_or(Err(()), |node| Ok(node))
+    pub fn parse(&mut self) -> Result<ExpressionNode, String> {
+        self.parse_expression().map_or(Err("Unable to parse expression.".to_string()), |node| Ok(node))
     }
 
     fn parse_expression(&mut self) -> Option<ExpressionNode> {
