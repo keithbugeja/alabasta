@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'lambda'",
+            "name": "Debug executable 'alabasta'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=lambda",
-                    "--package=lambda"
+                    "--bin=alabasta",
+                    "--package=alabasta"
                 ],
                 "filter": {
-                    "name": "lambda",
+                    "name": "alabasta",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'lambda'",
+            "name": "Debug unit tests in executable 'alabasta'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=lambda",
-                    "--package=lambda"
+                    "--bin=alabasta",
+                    "--package=alabasta"
                 ],
                 "filter": {
-                    "name": "lambda",
+                    "name": "alabasta",
                     "kind": "bin"
                 }
             },
