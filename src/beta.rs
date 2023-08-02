@@ -59,16 +59,41 @@ impl BetaReducer {
                 let application = self.substitute(application.as_ref(), variable, argument);
 
                 // If either substitution failed, we can't substitute the application
-                match (function, application) {
+                let result = match (function, application) {
                     (Some(function), Some(application)) => {
                         Some(NormalExpressionNode::Application(Rc::new(function), Rc::new(application)))
                     },
                     _ => {
                         None
                     }
-                }
+                };
+
+                // println!("Substitution: Application => "); pretty_print_normal(&result.clone().unwrap()); println!();
+
+                result
+            },
+            NormalExpressionNode::Arithmetic(left, operator, right) => {
+                // Substitute both the left and right side of the arithmetic expression
+                let left = self.substitute(left.as_ref(), variable, argument);
+                let right = self.substitute(right.as_ref(), variable, argument);
+
+                // If either substitution failed, we can't substitute the arithmetic expression
+                let result = match (left, right) {
+                    (Some(left), Some(right)) => {
+                        Some(NormalExpressionNode::Arithmetic(Rc::new(left), operator.clone(), Rc::new(right)))
+                    },
+                    _ => {
+                        None
+                    }
+                };
+
+                // println!("Substitution: Arithmetic => "); pretty_print_normal(&result.clone().unwrap()); println!();
+
+                result
             },
             _ => {
+                // Technically, we shouldn't be here
+                // println!("Substitution: Default");
                 Some(NormalExpressionNode::Application(Rc::new(expression.clone()), Rc::new(argument.clone())))
             }
         }
@@ -88,10 +113,15 @@ impl BetaReducer {
             },
             // Make sure abstraction body is in NF
             NormalExpressionNode::Abstraction(parameter, body) => {
-                NormalExpressionNode::Abstraction(
+                let result = NormalExpressionNode::Abstraction(
                     parameter.clone(), 
                     Rc::new(self.reduce(body.as_ref()))
-                )
+                );
+
+                // print!("Beta Reduction: Reduced body of abstraction ({}) => ", parameter);
+                // pretty_print_normal(&result.clone()); println!();
+
+                result
             },
             // Application
             NormalExpressionNode::Application(function, argument) => {                
@@ -100,11 +130,9 @@ impl BetaReducer {
                 let argument = self.reduce(argument.as_ref());
 
                 // If the function is an abstraction, we need to substitute the parameter with the argument
-                match function.clone() {
+                let result = match function.clone() {
                     NormalExpressionNode::Abstraction(parameter, body) => 
                     {
-                        // println!("Beta Reduction: Substituting {} with {:?}", parameter, argument);
-
                         self.substitute(body.as_ref(), &parameter, &argument)
                             .map_or(
                                 NormalExpressionNode::Application(Rc::new(function), Rc::new(argument)), 
@@ -113,12 +141,17 @@ impl BetaReducer {
                     _ => {
                         NormalExpressionNode::Application(Rc::new(function), Rc::new(argument))
                     }
-                }
+                };
+
+                // println!("Beta Reduction: Reduced application => "); pretty_print_normal(&result.clone()); println!();
+
+                result
             },
             // Arithmetic
             NormalExpressionNode::Arithmetic(lhs, operator, rhs) => {
                 let lhs = self.reduce(lhs.as_ref());
                 let rhs = self.reduce(rhs.as_ref());
+
                 match (lhs.clone(), rhs.clone()) {
                     (NormalExpressionNode::Constant(lhs), NormalExpressionNode::Constant(rhs)) => {
                         match operator.as_str() {
@@ -153,10 +186,15 @@ impl BetaReducer {
             NormalExpressionNode::Let(parameter, expression, body) => {
                 let expression = self.reduce(expression.as_ref());
                 let body = self.reduce(body.as_ref());
-                self.substitute(&body, parameter, &expression)
+
+                let result = self.substitute(&body, parameter, &expression)
                     .map_or(
                         NormalExpressionNode::Let(parameter.clone(), Rc::new(expression), Rc::new(body)), 
-                        |body| self.reduce(&body))
+                        |body| self.reduce(&body));
+
+                // print!("Beta Reduction: Reduced let expression => "); pretty_print_normal(&result.clone()); println!();
+
+                result
             }
         }
     }

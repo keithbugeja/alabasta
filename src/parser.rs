@@ -220,8 +220,6 @@ impl Parser {
         if let Some(operator) = self.expect(Lexeme::BinaryOperator(String::new())) {
             match operator.token_type {
                 Lexeme::BinaryOperator(value) => {
-                    print!(" {} ", value);
-                    
                     let right = match self.peek()?.token_type {
                         Lexeme::Identifier(_) => self.parse_variable()?,
                         Lexeme::Integer(_) => self.parse_constant()?,

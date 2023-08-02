@@ -17,12 +17,12 @@ use pretty::{
 fn main() {
     //let expression = r"(\x. (\z. z x) x) ((\y. y) 1 + 1)";
     //let expression = r"(\z. (\y. (\x. x y) y z)) 1";
-    let expression = r"(\x. \y. \z. x y z) 1 2 3";
+    // let expression = r"(\x. \y. \z. x y z) 1 2 3";
     // let expression = r"(\x. \y. \z. x y z) 1 2 3";
     // let expression = "x y z";
     // let expression = r"(\f. \x. f (f x)) (\y. y * 2) 3";
     // let expression = r"(\x. x + 3) ((\y. y * 2) 5) + (\z. z / 2) (4 - 1)";
-    // let expression = r"let double = \x. x * 2 in double 5";
+    let expression = r"let double = \x. x * 2 in double 5";
 
     // let expression = r"let f x = g x in
     //                    let g x = f x in
