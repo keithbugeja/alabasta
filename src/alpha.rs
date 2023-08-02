@@ -98,19 +98,16 @@ impl SyntaxTreeVisitor for AlphaConverter {
             ExpressionNode::Let(node) => {
                 self.visit_let(node);
             },
-            ExpressionNode::SubExpression(node) => {
-                self.visit_expression(node);
-            },
         }
     }
 
     fn visit_abstraction(&mut self, node: &AbstractionNode) {
-        let variable_name = node.parameter.name.borrow().clone();
+        let variable_name = node.variable.name.borrow().clone();
         
         self.bind(&variable_name);
 
-        node.parameter.accept(self);
-        node.body.accept(self);
+        node.variable.accept(self);
+        node.expression.accept(self);
 
         self.release(&variable_name);
     }
@@ -126,8 +123,10 @@ impl SyntaxTreeVisitor for AlphaConverter {
     }
 
     fn visit_let(&mut self, node: &LetNode) {
-        node.expression_lhs.accept(self);
-        node.expression_rhs.accept(self);
-        node.body.accept(self);
+        // node.expression_lhs.accept(self);
+        // node.expression_rhs.accept(self);
+        node.variable.accept(self);
+        node.expression.accept(self);
+        node.scope.accept(self);
     }
 }

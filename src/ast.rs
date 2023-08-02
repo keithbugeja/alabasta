@@ -24,7 +24,6 @@ pub enum ExpressionNode {
     Application(ApplicationNode),
     Arithmetic(ArithmeticNode),
     Let(LetNode),
-    SubExpression(Rc<ExpressionNode>),
 }
 
 impl ExpressionNode {
@@ -73,8 +72,8 @@ impl ConstantNode {
 /// 
 #[derive(Debug, PartialEq, Clone)]
 pub struct AbstractionNode {
-    pub parameter: Rc<VariableNode>,
-    pub body: Rc<ExpressionNode>,
+    pub variable: Rc<VariableNode>,
+    pub expression: Rc<ExpressionNode>,
 }
 
 impl AbstractionNode {
@@ -122,9 +121,9 @@ impl ArithmeticNode {
 /// 
 #[derive(Debug, PartialEq, Clone)]
 pub struct LetNode {
-    pub expression_lhs: Rc<ExpressionNode>,
-    pub expression_rhs: Rc<ExpressionNode>,
-    pub body: Rc<ExpressionNode>,
+    pub variable: VariableNode,
+    pub expression: Rc<ExpressionNode>,
+    pub scope: Rc<ExpressionNode>,
 }
 
 impl LetNode {

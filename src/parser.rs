@@ -104,6 +104,7 @@ impl Parser {
         //      | E <op> E
         //      | (E)
         //      | I | C
+        //      | let I = E in E
 
         let mut left = self.parse_single_expression()?;
 
@@ -126,34 +127,26 @@ impl Parser {
     }
 
     fn parse_let_expression(&mut self) -> Option<ExpressionNode> {
-        print!("let ");
-        
         let _ = self.expect(Lexeme::Let)?;
         
-        // let variable = match self.parse_variable()? {
-        //     ExpressionNode::Variable(variable) => { 
-        //         variable
-        //     },
-        //     _ => { return None; }
-        // };
-
-        let expression_lhs = self.parse_expression()?;
-
-        print!(" = ");
+        let variable = match self.parse_variable()? {
+            ExpressionNode::Variable(variable) => { 
+                variable
+            },
+            _ => { return None; }
+        };
         
         let _ = self.expect(Lexeme::Equals)?;
-        let expression_rhs  = self.parse_expression()?;
-        
-        print!(" in ");
+        let expression  = self.parse_expression()?;
 
         let _ = self.expect(Lexeme::In)?;
-        let body = self.parse_expression()?;
+        let scope = self.parse_expression()?;
 
         Some(ExpressionNode::Let(
             LetNode {
-                expression_lhs: Rc::new(expression_lhs),
-                expression_rhs: Rc::new(expression_rhs),
-                body: Rc::new(body),
+                variable: variable,
+                expression: Rc::new(expression),
+                scope: Rc::new(scope),
             }
         ))
     }
@@ -173,17 +166,14 @@ impl Parser {
     }
 
     fn parse_subexpression(&mut self) -> Option<ExpressionNode> {
-        print!("(");
         let _ = self.expect(Lexeme::LeftParen)?;
         let expression = self.parse_expression()?;
         let _ = self.expect(Lexeme::RightParen)?;
-        print!(")");
 
         Some(expression)
     }
 
     fn parse_abstraction(&mut self) -> Option<ExpressionNode> {
-        print!("λ");
         let _ = self.expect(Lexeme::Lambda)?;
 
         let variable = match self.parse_variable()? {
@@ -194,14 +184,12 @@ impl Parser {
         };
         
         let _ = self.expect(Lexeme::Dot)?;
-        print!(".");
-        
         let expression = self.parse_expression()?;
     
         return Some(ExpressionNode::Abstraction(
             AbstractionNode {
-                parameter: Rc::new(variable),
-                body: Rc::new(expression),
+                variable: Rc::new(variable),
+                expression: Rc::new(expression),
             }
         ));
     }
@@ -210,8 +198,6 @@ impl Parser {
         let operator = self.expect(Lexeme::BinaryOperator(String::new()))?;
 
         if let Lexeme::BinaryOperator(value) = operator.token_type {
-            print!(" {} ", value);
-
             let right = self.parse_single_expression()?;
             let expression = ExpressionNode::Arithmetic(ArithmeticNode {
                 operator: value,
@@ -260,7 +246,6 @@ impl Parser {
     fn parse_variable(&mut self) -> Option<ExpressionNode> {
         if let Some(identifier) = self.expect(Lexeme::Identifier(String::new())) {
             if let Lexeme::Identifier(value) = identifier.token_type {
-                print!("{}", value);
                 Some(ExpressionNode::Variable(VariableNode { name: Rc::new(RefCell::new(value))}))
             } else {
                 None
@@ -273,7 +258,6 @@ impl Parser {
     fn parse_constant(&mut self) -> Option<ExpressionNode> {
         if let Some(integer) = self.expect(Lexeme::Integer(0)) {
             if let Lexeme::Integer(value) = integer.token_type {
-                print!("{}", value);
                 Some(ExpressionNode::Constant(ConstantNode { value }))
             } else {
                 None
