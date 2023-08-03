@@ -32,14 +32,14 @@ impl Lexer {
 
     fn peek(&mut self) -> Option<char> {
         if self.position >= self.input.len() {
-            return None;
+            return Some('\0');
         }
 
         if let Some(chr_as_str) = self.input.get(self.position..self.position+1) {
             return chr_as_str.chars().next();
         }
 
-        return None;
+        return Some('\0');
     }
 
     pub fn scan(&mut self) -> Result<Vec::<Token>, String> {

@@ -176,8 +176,9 @@ fn main() -> rustyline::Result<()>{
 
         // Read input
         let readline = rl.readline(&prompt);
+        
         match readline {
-            Ok(line) => {                
+            Ok(line) => {
                 // check for builtin commands or evaluate expression
                 match line {
                     // exit the REPL
