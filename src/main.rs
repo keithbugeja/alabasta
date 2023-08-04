@@ -1,5 +1,5 @@
 ///
-/// Lambdastampa: a λ-expr REPL.
+/// Alabasta: a λ-expr REPL.
 ///
 /// Some supported expressions: 
 /// 

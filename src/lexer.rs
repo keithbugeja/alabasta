@@ -109,7 +109,7 @@ impl Lexer {
                     });
                 },
                 // Lambda
-                '\\' => {
+                '\\' | '^' => {
                     self.next();
 
                     token_list.push(Token {
@@ -211,7 +211,7 @@ pub enum Lexeme
 pub fn lexeme_from_string(input: String) -> Lexeme {
     match input.as_str() {
         "+" | "-" | "*" | "/" | "%" => Lexeme::BinaryOperator(input),
-        "\\" => Lexeme::Lambda,
+        "\\" | "^"=> Lexeme::Lambda,
         "." => Lexeme::Dot,
         "(" => Lexeme::LeftParen,
         ")" => Lexeme::RightParen,

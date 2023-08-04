@@ -1,15 +1,12 @@
 use std::rc::Rc;
 
-use crate::{ast::{
-    ExpressionNode, 
-    VariableNode, 
-    ConstantNode, 
-    AbstractionNode, 
-    ApplicationNode, 
-    ArithmeticNode, 
-    LetNode,
-    SyntaxTreeVisitor
-}, pretty::{pretty_print_normal, pretty_print}};
+use crate::{
+    ast::ExpressionNode, 
+    // pretty::{
+    //     pretty_print_normal, 
+    //     pretty_print
+    // }
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum NormalExpressionNode {

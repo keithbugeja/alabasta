@@ -1,14 +1,4 @@
-use crate::ast::{
-    ExpressionNode, 
-    VariableNode, 
-    ConstantNode, 
-    AbstractionNode, 
-    ApplicationNode, 
-    ArithmeticNode, 
-    LetNode,
-    SyntaxTreeVisitor
-};
-
+use crate::ast::ExpressionNode;
 use crate::beta::NormalExpressionNode;
 
 pub fn pretty_print(node: &ExpressionNode) {
@@ -44,7 +34,7 @@ pub fn pretty_print(node: &ExpressionNode) {
             print!(" in ");
             pretty_print(node.scope.as_ref());
         },
-        _ => { }
+        // _ => { }
     }
 }
 

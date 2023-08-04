@@ -19,14 +19,27 @@
 /// 
 /// Constant    :=  Integer
 /// 
-/// BinaryOperator := '+' | '-' | '*' | '/'
+/// BinaryOperator := '+' | '-' | '*' | '/' | '%'
 /// 
-/// Identifier  :=  [a-zA-Z]+
+/// Identifier  :=  [a-zA-Z][a-zA-Z_0-9]*
 /// 
 /// Integer     :=  [0-9]+
 ///  
-use crate::lexer::{Token, Lexeme};
-use crate::ast::{ExpressionNode, VariableNode, ConstantNode, AbstractionNode, ApplicationNode, ArithmeticNode, LetNode};
+
+use crate::lexer::{
+    Token, 
+    Lexeme
+};
+
+use crate::ast::{
+    ExpressionNode, 
+    VariableNode, 
+    ConstantNode, 
+    AbstractionNode, 
+    ApplicationNode, 
+    ArithmeticNode, 
+    LetNode
+};
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -42,10 +55,6 @@ impl Parser {
             token_list,
             position: 0,
         }
-    }
-
-    fn position(&self) -> usize {
-        self.position
     }
 
     fn next(&mut self) -> Option<Token> {
@@ -95,17 +104,6 @@ impl Parser {
     }
 
     fn parse_expression(&mut self) -> Option<ExpressionNode> {
-        // --------------------
-        // EBNF
-        // --------------------
-        // E :=
-        //      | \I. E
-        //      | E E
-        //      | E <op> E
-        //      | (E)
-        //      | I | C
-        //      | let I = E in E
-
         let mut left = self.parse_single_expression()?;
 
         loop {

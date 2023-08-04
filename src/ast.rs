@@ -46,9 +46,9 @@ impl VariableNode {
         visitor.visit_variable(self);
     }
 
-    pub fn rename(&mut self, new_name: &str) {
-        self.name = Rc::new(RefCell::new(new_name.to_string()));
-    }
+    // pub fn rename(&mut self, new_name: &str) {
+    //     self.name = Rc::new(RefCell::new(new_name.to_string()));
+    // }
 }
 
 
@@ -61,9 +61,9 @@ pub struct ConstantNode {
 }
 
 impl ConstantNode {
-    pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
-        visitor.visit_constant(self);
-    }
+    // pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
+    //     visitor.visit_constant(self);
+    // }
 }
 
 
@@ -77,9 +77,9 @@ pub struct AbstractionNode {
 }
 
 impl AbstractionNode {
-    pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
-        visitor.visit_abstraction(self);
-    }
+    // pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
+    //     visitor.visit_abstraction(self);
+    // }
 }
 
 
@@ -93,9 +93,9 @@ pub struct ApplicationNode {
 }
 
 impl ApplicationNode {
-    pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
-        visitor.visit_application(self);
-    }
+    // pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
+    //     visitor.visit_application(self);
+    // }
 }
 
 
@@ -110,9 +110,9 @@ pub struct ArithmeticNode {
 }
 
 impl ArithmeticNode {
-    pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
-        visitor.visit_arithmetic(self);
-    }
+    // pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
+    //     visitor.visit_arithmetic(self);
+    // }
 }
 
 
@@ -127,7 +127,7 @@ pub struct LetNode {
 }
 
 impl LetNode {
-    pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
-        visitor.visit_let(self);
-    }
+    // pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
+    //     visitor.visit_let(self);
+    // }
 }
