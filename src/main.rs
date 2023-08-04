@@ -240,6 +240,7 @@ fn main() -> rustyline::Result<()>{
                         lambda_expression = String::new();
                     } else {
                         // concatenate the current line to the lambda expression
+                        lambda_expression.push_str(" ");
                         lambda_expression.push_str(line.as_str());
                     }
                 }
