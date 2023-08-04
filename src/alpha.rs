@@ -6,7 +6,7 @@ use std::{
     }
 };
 
-use crate::ast::{
+use crate::{ast::{
     ExpressionNode, 
     VariableNode, 
     ConstantNode, 
@@ -15,7 +15,7 @@ use crate::ast::{
     ArithmeticNode, 
     LetNode,
     SyntaxTreeVisitor
-};
+}, beta::NormalExpressionNode};
 
 pub struct AlphaConverter {
     variable_scope_stack: HashMap<String, Vec<String>>,

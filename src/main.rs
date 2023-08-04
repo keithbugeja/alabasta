@@ -29,14 +29,22 @@
 mod lexer;
 mod parser;
 mod ast;
+mod convert;
 mod alpha;
 mod beta;
 mod pretty;
 
 use lexer::Lexer;
 use parser::Parser;
+use convert::{
+    to_normal_form,
+    from_normal_form,
+};
 use alpha::AlphaConverter;
-use beta::{BetaReducer, NormalExpressionNode};
+use beta::{
+    BetaReducer, 
+    NormalExpressionNode
+};
 use pretty::{
     pretty_print_normal,
     pretty_print
@@ -297,7 +305,7 @@ fn eval(lambda_expression: &String, options: &EvalOptions) -> Result<NormalExpre
 
     // Perform beta reduction on the abstract syntax tree
     let mut beta_reducer = BetaReducer::new();
-    let normal_form = beta_reducer.convert(&ast);
+    let normal_form = to_normal_form(&ast);
     let result = beta_reducer.reduce(&normal_form);
 
     // Print the normal form

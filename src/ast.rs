@@ -42,6 +42,12 @@ pub struct VariableNode {
 }
 
 impl VariableNode {
+    pub fn new(name: &str) -> VariableNode {
+        VariableNode {
+            name: Rc::new(RefCell::new(name.to_string())),
+        }
+    }
+    
     pub fn accept(&self, visitor: &mut dyn SyntaxTreeVisitor) {
         visitor.visit_variable(self);
     }
