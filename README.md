@@ -37,7 +37,7 @@ Arithmetic:
 
 Let Expressions:
 ```
-λ-expr >> let x = \y. y in x (\z.z)
+λ-expr >> let x = \y.y in x (\z.z)
 => (λ@x1. @x1)
 ```
 ```
