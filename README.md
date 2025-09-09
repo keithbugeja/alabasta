@@ -47,4 +47,4 @@ Let Expressions:
 
 ## Disclaimer
 
-Alabasta is a Rust project undertaken as a learning experience. Please note that it's a work-in-progress, and there's limited error handling and reporting. As a result, there may be bugs and less-than-perfect code. 🚀✨
+Alabasta is a Rust project undertaken as a learning experience. Please note that it's a work-in-progress, and there's limited error handling and reporting. As a result, there may be bugs and less-than-perfect code.
